@@ -46,6 +46,7 @@ end counter;
 architecture Behavioral of counter is
 
 signal s_counter : std_logic_vector (3 downto 0) ;
+signal s_flag : std_logic;
 
 begin
    process (i_clk , i_reset)
@@ -54,15 +55,20 @@ begin
 	     s_counter <= (others => '0') ;
          o_data    <= (others => '0') ;
          o_stop   <= '0' ;
+         s_flag   <= '1' ;
 	 elsif i_clk'event and i_clk = '1' then
 	     if i_load = '1' then
 			 s_counter <= i_data ;
 		 elsif s_counter /= i_stop_value then
 			 s_counter <= s_counter +1 ;
              o_data    <= s_counter ;
-         else
+          elsif s_flag = '1' then
              o_data    <= s_counter ;
-             o_stop   <= '1' ;
+             o_stop    <= '1' ;
+             s_flag    <= not(s_flag) ;
+         else 
+           o_data    <= s_counter ;
+           o_stop   <= '0' ;
 		end if;
 	 end if ;
 	end process ;

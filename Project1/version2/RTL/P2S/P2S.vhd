@@ -45,7 +45,7 @@ o_data_s : out std_logic
 end P2S;
 
 architecture Behavioral of P2S is
-signal s_counter :integer range 0  to 3 := 0;
+signal s_counter :integer range 0  to 4 := 0;
 begin
 process (i_clk , i_reset )
  begin
@@ -54,16 +54,13 @@ process (i_clk , i_reset )
    s_counter <= 0   ;
    o_done    <= '0' ;
   elsif i_clk'event and i_clk = '1' then
-  if i_valid = '1' then
-   if s_counter = 4 then 
-    s_counter <= 0  ;
-    o_data_s <= '0' ;
-    o_done  <=  '0' ;
-   else
-    o_data_s <= i_data_p (s_counter);
-    s_counter <= s_counter +1 ;
+   if i_valid = '1' then
+        s_counter <= 4  ;
+        o_done  <=  '0' ;
+   elsif s_counter /=0 then 
+    o_data_s <= i_data_p (4-s_counter);
+    s_counter <= s_counter -1 ;
     o_done  <=  '1' ;
-   end if ;
   else
     o_data_s <= '0' ;
     s_counter <= 0 ;
