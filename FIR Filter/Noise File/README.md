@@ -1,0 +1,1 @@
+That is a Python code for generating a noisy signal to test with an FIR filter. Additionally, the code is used for sending and receiving data with the UART of the ZC702 FPG
