@@ -13,7 +13,7 @@
 #include <xparameters.h>
 
 #define dataSize 512*512
-#define headerSize 30160
+#define headerSize 30170
 #define fileSize dataSize+headerSize
 int main(){
 	u8 *fileData; // unsigned 8-bit , pointer type
