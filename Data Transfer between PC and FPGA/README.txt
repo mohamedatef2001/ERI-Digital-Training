@@ -1,1 +1,1 @@
-This is an image inversion project implemented on an FPGA board. It takes a black image (512x512) and inverts it using C code in the PS of the ZC702.
+This is an image(.PNG) inversion project implemented on an FPGA board. It takes a black image (512x512) and inverts it using C code in the PS of the ZC702.
