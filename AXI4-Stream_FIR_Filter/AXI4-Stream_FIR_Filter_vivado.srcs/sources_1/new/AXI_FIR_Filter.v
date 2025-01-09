@@ -91,7 +91,7 @@ always@(posedge axi_clk or negedge axi_reset_n)
         end
         
       else
-          m_axis_valid <= s_axis_valid && s_axis_ready ;
+          m_axis_valid <= s_axis_valid  ;
       
  end
  
