@@ -11,6 +11,8 @@
 #include <xil_types.h>
 #include <xuartps.h>
 #include <xparameters.h>
+#include <time.h>
+
 
 #define dataSize 512*512
 #define headerSize 30170
@@ -24,7 +26,7 @@ int main(){
 
     u32 transmittedBytes=0;
 	u32 totalTransmittedBytes=0;
-	
+
 
 	//u32 sendBytes=0;
 	XUartPs_Config *uartConfig;
@@ -42,33 +44,34 @@ int main(){
 	if(status != XST_SUCCESS )
 			print("BAUDRATE FAILED\n\r");
 
-
+    //print("ready to receive\n\r");
       //Receive Data
       while(totalReceviedBytes < fileSize){
 	  receviedBytes= XUartPs_Recv(&myUart,(u8*)&fileData[totalReceviedBytes],100);
 	  totalReceviedBytes+= receviedBytes;
       }
 
+      /*
+      for(int i=0;i<10;i++){
+    	  xil_printf("%0x" ,fileData[i] );
+      }
+      */
 
-      for(int i=headerSize;i<fileSize;i++)
+      for(int i=headerSize;i<fileSize;i++){
     	  fileData[i] = 255-fileData[i];
+      }
       //Send data
 	  while(totalTransmittedBytes < fileSize){
-	  transmittedBytes= XUartPs_Send(&myUart,(u8*)&fileData[totalReceviedBytes],1);
-	  totalReceviedBytes+= transmittedBytes;
-	  sleep(2);
+	  transmittedBytes= XUartPs_Send(&myUart,(u8*)&fileData[totalTransmittedBytes],1);
+	  totalTransmittedBytes+= transmittedBytes;
+	  usleep(2000);
       }
 
- /*
-      //sleep(1);
-      for(int i=0; i<10;i++){
-    	  xil_printf("%0x" , fileData[i]);
+      /*
+      for(int i=0;i<10;i++){
+    	  xil_printf("%0x" ,fileData[i] );
       }
-
-      //sendBytes = XUartPs_Send(&myUart,(u8*)&fileData,10);
-      return 0;
- */
-
+      */
 
 }
 
