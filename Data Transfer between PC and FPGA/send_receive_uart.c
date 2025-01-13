@@ -15,7 +15,7 @@
 
 
 #define dataSize 512*512
-#define headerSize 30170
+#define headerSize 1078
 #define fileSize dataSize+headerSize
 int main(){
 	u8 *fileData; // unsigned 8-bit , pointer type
@@ -35,7 +35,10 @@ int main(){
 
 
 
-	fileData = malloc(sizeof(fileSize));//take size in bytes
+	fileData = malloc(sizeof(u8)*(fileSize));//take size in bytes
+	if(fileData <= 0){
+		print("malloc FAILED\n\r");
+	}
 	uartConfig = XUartPs_LookupConfig(XPAR_PS7_UART_1_DEVICE_ID);
 	status = XUartPs_CfgInitialize(&myUart,uartConfig, uartConfig->BaseAddress);
 	if(status != XST_SUCCESS )
@@ -56,6 +59,7 @@ int main(){
     	  xil_printf("%0x" ,fileData[i] );
       }
       */
+
 
       for(int i=headerSize;i<fileSize;i++){
     	  fileData[i] = 255-fileData[i];
