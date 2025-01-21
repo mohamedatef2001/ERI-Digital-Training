@@ -24,12 +24,15 @@ input axi_reset_n,
 
 //AXI4-S slave I/O
 input s_axis_valid,
+(* IOSTANDARD = "LVCMOS18", SLEW = "SLOW", DRIVE = 8 *)
 input signed [DATA_INPUT-1:0] s_axis_data,
 output s_axis_ready,
 
 //AXI4-S master I/O
 input  m_axis_ready,
 output reg  m_axis_valid,
+(* use_dsp = "yes" *)
+(* IOSTANDARD = "LVCMOS18", SLEW = "SLOW", DRIVE = 8 *)
 output reg signed [DATA__OUTPUT-1:0] m_axis_data
  );
  
@@ -67,9 +70,10 @@ begin
                  s_samples[4] <= 0;
                  s_samples[5] <= 0;
                  s_samples[6] <= 0;
+                 m_axis_data <= 0;
        end
             
-     else if(s_axis_valid && s_axis_ready)
+     else if(s_axis_valid & s_axis_ready)
        begin 
               s_samples[0] <= s_axis_data; 
               s_samples[1] <= s_samples[0];
@@ -78,6 +82,15 @@ begin
               s_samples[4] <= s_samples[3];
               s_samples[5] <= s_samples[4];
               s_samples[6] <= s_samples[5];
+            
+             m_axis_data <= b[0]*s_axis_data 
+             +b[1]*s_samples[0]
+             +b[2]*s_samples[1]
+             +b[3]*s_samples[2]
+             +b[4]*s_samples[3]
+             +b[5]*s_samples[4]
+             +b[6]*s_samples[5]
+             +b[7]*s_samples[6]; 
               
         end
  end 
@@ -86,38 +99,12 @@ begin
 always@(posedge axi_clk or negedge axi_reset_n)
  begin
      if(!axi_reset_n)
-        begin
           m_axis_valid <= 0 ;
-        end
-        
       else
-          m_axis_valid <= s_axis_valid  ;
+          m_axis_valid <= s_axis_valid ;
       
  end
  
- //output logic
- always@(*)
-  begin
-  if(s_axis_valid && s_axis_ready)
-  begin
-      m_axis_data = b[0]*s_axis_data 
-     +b[1]*s_samples[0]
-     +b[2]*s_samples[1]
-     +b[3]*s_samples[2]
-     +b[4]*s_samples[3]
-     +b[5]*s_samples[4]
-     +b[6]*s_samples[5]
-     +b[7]*s_samples[6];    
-   end  
- else 
- m_axis_data = 0;
-   
-  end
-  
+
  endmodule
-        
-        
-        
-        
-        
         

@@ -42,7 +42,7 @@ if (fileData <= 0){
 
 //-------------------------------DMA initialization----------------------------------//
  //Look up the hardware configuration for a device instance based on base address
- MyDmaConfig = XAxiDma_LookupConfigBaseAddr(XPAR_FILTER_FIR_DMA_BASEADDR);
+ MyDmaConfig = XAxiDma_LookupConfigBaseAddr(XPAR_AXI_DMA_0_BASEADDR);
  //This function initializes a DMA engine.
  status = XAxiDma_CfgInitialize(&MyDMA, MyDmaConfig);
  if(status!=XST_SUCCESS){
@@ -97,14 +97,14 @@ if (fileData <= 0){
  /// Note that this function just configures the internal register of the DMA,
  /// where it needs the data and how much it needs to send.
  /// But this function doesn't wait for all the data to be sent.
- status = XAxiDma_SimpleTransfer(&MyDMA, (u32)&fileData, fileSize ,XAXIDMA_DEVICE_TO_DMA);
+ status = XAxiDma_SimpleTransfer(&MyDMA, (u32)&fileData[0],fileSize ,XAXIDMA_DEVICE_TO_DMA);
  if(status!=XST_SUCCESS){
 	 print("XAXIDMA_DEVICE_TO_DMA failed");
 	 return -1;
  }
 
  //-----------------------------XAXIDMA_DMA_TO_DEVICE--------------------------//
- status = XAxiDma_SimpleTransfer(&MyDMA, (u32)&fileData,fileSize ,XAXIDMA_DMA_TO_DEVICE);
+ status = XAxiDma_SimpleTransfer(&MyDMA, (u32)&fileData[0],fileSize ,XAXIDMA_DMA_TO_DEVICE);
  if(status!=XST_SUCCESS){
 	 print("XAXIDMA_DEVICE_TO_DMA failed");
 	 return -1;
@@ -114,20 +114,20 @@ if (fileData <= 0){
 //-------------------------------checkHalted-----------------------------------------//
 // Check if either DMA internal memory gets full during sending and receiving data. It will stay in that loop until
 // all data is transferred.
- status = checkHalted(XPAR_FILTER_FIR_DMA_BASEADDR,0x4);
+ status = checkHalted(XPAR_AXI_DMA_0_BASEADDR,0x4);
     while(status != 1){
-    	status = checkHalted(XPAR_FILTER_FIR_DMA_BASEADDR,0x4);
+    	status = checkHalted(XPAR_AXI_DMA_0_BASEADDR,0x4);
     }
-    status = checkHalted(XPAR_FILTER_FIR_DMA_BASEADDR,0x34);
+    status = checkHalted(XPAR_AXI_DMA_0_BASEADDR,0x34);
     while(status != 1){
-    	status = checkHalted(XPAR_FILTER_FIR_DMA_BASEADDR,0x34);
+    	status = checkHalted(XPAR_AXI_DMA_0_BASEADDR,0x34);
     }
 	//print("DMA transfer success..\n");
 
 //------------------------------Sending data to PC-----------------------------------//
 while(TotalTransmittedBytes<fileSize){
 //xil_printf("data = %0x", (u8*)&fileData[TotalTransmittedBytes]);
-TransmittedBytes =  XUartPs_Send(&MyUart,(u8*)&fileData[TotalTransmittedBytes],1);
+TransmittedBytes =  XUartPs_Send(&MyUart,(u8*)&fileData[TotalTransmittedBytes],2);
 TotalTransmittedBytes += TransmittedBytes;
  usleep(1000) ;
 }
@@ -143,7 +143,6 @@ u32 checkHalted(u32 baseAddress,u32 offset){
 		status = (XAxiDma_ReadReg(baseAddress,offset))&XAXIDMA_HALTED_MASK;
 		return status;
 }
-
 
 
 

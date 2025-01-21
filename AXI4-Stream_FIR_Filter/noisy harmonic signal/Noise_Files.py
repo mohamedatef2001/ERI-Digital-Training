@@ -16,6 +16,9 @@ def int16_to_hex(i):
 # Function to convert a signed 16-bit integer to binary
 def int16_to_binary(i):
     return bin(struct.unpack('<H', struct.pack('<h', i))[0]).replace("0b", "").zfill(16)
+
+def tohex(val , nbits):
+     return hex ((val + (1 << nbits)) % (1 <<nbits))
 #compute a binary representation of the filter coff
 tap=8
 #for computing first scale, we want to represent filter coff as 8 bit
@@ -60,13 +63,13 @@ for number in output:
     list1.append(int(number*(2**N1-1)));
 
 #convert to binary and save this data
-with open('input_data_bin' , 'w') as file:
+with open('input_data_bin.txt' , 'w') as file:
     for number in list1:
         binary_value = int16_to_binary(number)
         file.write(binary_value+'\n')
 
 #convert to hex and save this data
-with open('input_data_hex' , 'w') as file:
+with open('input_data_hex.txt' , 'w') as file:
     for number in list1:
         hex_value = int16_to_hex(number)
         file.write(hex_value+'\n')
@@ -74,49 +77,44 @@ with open('input_data_hex' , 'w') as file:
 ####################                        TEST4                       ##########################
 ##################################################################################################
 
+# Example list of signed decimal values
+values = list1
+packed_data = bytearray()
 
-#send data to uart
+# Pack the list into a binary format 
+packed_data = struct.pack(f'{len(values)}i', *values)
+"""""
+print(values)
+print(packed_data);
+# Unpack the received data
+unpacked_data = struct.unpack(f'{len(values)}i', packed_data)
+print(unpacked_data);
+"""
 
-#For serial comm with uart and baud_rate
-com_port = 'COM5'
-baud_rate = 115200
+# Configure the serial port (adjust the parameters as needed)
+#ser = serial.Serial('COM7', 115200, timeout=1)  # Replace with your UART port and baud rate
 
+# Send the packed data over UART
+print(len(values))
+print(packed_data);
+print(list1)
 
-#Array for sending data to uart
-dataSendingToUart=[]
-with open("input_data_hex", 'r') as file:
-    for line in file:
-        dataSendingToUart.append(line.rstrip('\n'))
+ser = serial.Serial('COM7', 115200)  # Adjust the port and baud rate as needed
 
-#open connection with uart and send data        
-ser = serial.Serial(com_port,baudrate=baud_rate, timeout=1)
-try:
-        for byte in dataSendingToUart:
-            data = ser.write(bytes([byte]))
-            print(f"sending data:  {hex(byte)} ")
-            time.sleep(0.1)
-except KeyboardInterrupt:
-            print("\nExiting ...")
-finally:
-        ##ser.close()
-         print("Serial Port finish with sending \n now receive.")
+# Send the packed data
+ser.write(packed_data)
 
-#Receive filterd signal
-with open("save_data", 'wb') as file:
-    print(f"Reading data from {com_port} ...")
-    try:
-        while True:
-            data = ser.read(10)
-            if data:
-                file.write(data)
-                print(f"Reading and saving data:  {data} ")
-                break;
+# Receive the data back
+received_data = ser.read(len(packed_data))
 
-    except KeyboardInterrupt:
-        print("\nExiting ...")
-    finally:
-        ser.close()
-        print("Serial Port closed.")
+# Unpack the received data
+unpacked_data = struct.unpack(f'{len(values)}i', received_data)
+
+# Close the UART communication
+ser.close()
+
+# Print the received values
+print(unpacked_data)
 
 ##################################################################################################
 ####################                        READ                        ##########################
@@ -124,17 +122,12 @@ with open("save_data", 'wb') as file:
 
 #from here, we read the filtered values, convert them to decimal representation
 
-read_b=[]
-with open("save_data", 'r') as file:
-    for line in file:
-        read_b.append(line.rstrip('\n'))
-#print(read_b)
 
 
 #this list contain the converted values
 n_l=[]
-for by in read_b:
-    n_l.append(todecimal(by,N3)/2**(2*(N1-1)))
+for by in unpacked_data:
+    n_l.append(by/2**(2*(N1-1)))
 
 #print(n_l)
 plt.plot(output,color='blue',linewidth=3,label='Original signal')
