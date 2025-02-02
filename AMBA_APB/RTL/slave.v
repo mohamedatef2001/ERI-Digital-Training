@@ -20,23 +20,23 @@ begin
   if (~i_PRESETn)
     for(i=0;i<=7;i=i+1)
     mem[i] = 0;
-  else if (i_PSEL1 && i_PENABLE && i_PWRITE)
-   begin
+  else if (i_PSEL1 & i_PENABLE & i_PWRITE)
+  begin
     mem[i_paddr] = i_pwdata;
-    o_PREADY = 1;
-   end
-  else if (i_PSEL1 && i_PENABLE && ! i_PWRITE)
-   begin
+    o_PREADY  = 1;
+  end
+    
+  else if (i_PSEL1 & i_PENABLE & ! i_PWRITE)
+  begin
     o_prdata = mem[i_paddr];
     o_PREADY = 1;
-   end
+  end
   else 
-   begin
+  begin
     o_prdata = 0;
     o_PREADY = 0;
-   end
+  end
     
  end
  endmodule
  
-

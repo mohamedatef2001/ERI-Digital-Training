@@ -75,11 +75,25 @@ begin
          
   SETUP: begin
      o_PSEL1 = 'd1;
+     if (i_READ_WRITE) // Write
+       begin
+         o_PWRITE = 'd1 ;
+         o_paddr  = i_apb_write_paddr;
+         o_pwdata = i_apb_write_data;
+       end
+      else
+        begin
+         o_PWRITE = 'd0 ;
+         o_paddr  = i_apb_read_paddr;
+         o_apb_read_data_out = i_prdata ;
+         
+        end
        end
        
   
   ACCESS : begin 
      o_PENABLE = 'd1; 
+     o_PSEL1   = 'd1;
      if (i_READ_WRITE) // Write
        begin
          o_PWRITE = 'd1 ;
